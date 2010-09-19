@@ -119,21 +119,21 @@ class HttpTask(Task):
 ###############################################################################
 
 def usage():
-	print("Usage: online.py { show | version | test | usage }")
+	print("Usage: netinfo.py { show | version | test | usage }")
 
 def version():
-	print("Version: 0.5 (2009-03-04)")
+	print("Version: 0.6 (2010-10-19)")
 	print("Author:  Daniel Kaefer")
 
 def show():
 	for localIP in getLocalIPs():
-		print("LocalIP: \t", localIP)
+		print "LocalIP: \t %s" % localIP
 
 	for router in getRouters():
-		print("Router: \t", router)
+		print "Router: \t %s" % router
 
 	for dns in getDNSs():
-		print("DNS:    \t", dns)
+		print "DNS:    \t %s" % dns
 
 def test():
 	tasks = []
