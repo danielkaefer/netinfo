@@ -34,7 +34,7 @@ import urllib2
 
 
 def getLocalIPs():
-	shell = "ip addr |grep \"inet \"|awk '{ print $2 }'"
+	shell = "ip addr |grep \"inet \"|awk '{ print $2 }'| grep -v 127.0.0.1"
 	p = subprocess.Popen([shell], shell=True, bufsize=1024, stdout=subprocess.PIPE, close_fds=True)
 	p.wait()
 	ips = []
