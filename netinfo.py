@@ -20,6 +20,7 @@
 ###############################################################################
 
 import sys
+import signal
 import os
 import subprocess
 import threading
@@ -35,7 +36,7 @@ import urllib2
 
 def getLocalIPs():
 	shell = "ip addr |grep \"inet \"|awk '{ print $2 }'| grep -v 127.0.0.1"
-	p = subprocess.Popen([shell], shell=True, bufsize=1024, stdout=subprocess.PIPE, close_fds=True)
+	p = subprocess.Popen([shell], shell=True, stdout=subprocess.PIPE, close_fds=True)
 	p.wait()
 	ips = []
 	oldIPs = p.stdout.read().splitlines()
@@ -46,13 +47,13 @@ def getLocalIPs():
 
 def getRouters():
 	shell = "ip route |grep default |awk '{print $3}'"
-	p = subprocess.Popen([shell], shell=True, bufsize=1024, stdout=subprocess.PIPE, close_fds=True)
+	p = subprocess.Popen([shell], shell=True, stdout=subprocess.PIPE, close_fds=True)
 	p.wait()
 	return p.stdout.read().splitlines()
 
 def getDNSs():
 	shell = "cat /etc/resolv.conf |grep nameserver |awk '{ print $2 }'"
-	p = subprocess.Popen([shell], shell=True, bufsize=1024, stdout=subprocess.PIPE, close_fds=True)
+	p = subprocess.Popen([shell], shell=True, stdout=subprocess.PIPE, close_fds=True)
 	p.wait()
 	return p.stdout.read().splitlines()
 
@@ -63,7 +64,19 @@ def getTestURLs():
 	return ["www.heise.de"]
 
 def ping(ipAddress):
-	return os.system("ping -c1 $1>/dev/null 2>&1 " + ipAddress)
+	return subprocess.call(["ping", "-c1", ipAddress], stdout=open('/dev/null', 'w'), stderr=subprocess.STDOUT)
+
+###############################################################################
+#                                                                             #
+#                               Signal Handler                                #
+#                                                                             #
+###############################################################################
+
+def handler(signum, fame):
+	print("exit")
+	raise SystemExit()
+	#sys.exit()
+signal.signal(signal.SIGINT, handler)
 
 ###############################################################################
 #                                                                             #
@@ -124,6 +137,7 @@ def usage():
 def version():
 	print("Version: 0.6 (2010-10-19)")
 	print("Author:  Daniel Kaefer")
+	print("Website: http://github.com/daniel-git/netinfo")
 
 def show():
 	for localIP in getLocalIPs():
@@ -164,6 +178,7 @@ def test():
 #                                     Main                                    #
 #                                                                             #
 ###############################################################################
+
 
 if 1 == len(sys.argv):
 	show()
