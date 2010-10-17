@@ -45,6 +45,17 @@ def getLocalIPs():
 
 	return ips
 
+def getLocalNetworks():
+	shell = "ip addr |grep \"inet \"|awk '{ print $2 }'| grep -v 127.0.0.1"
+	p = subprocess.Popen([shell], shell=True, stdout=subprocess.PIPE, close_fds=True)
+	p.wait()
+	ips = []
+	oldIPs = p.stdout.read().splitlines()
+	for ip in oldIPs:
+		ips.append(ip)
+
+	return ips
+
 def getRouters():
 	shell = "ip route |grep default |awk '{print $3}'"
 	p = subprocess.Popen([shell], shell=True, stdout=subprocess.PIPE, close_fds=True)
@@ -65,6 +76,9 @@ def getTestURLs():
 
 def ping(ipAddress):
 	return subprocess.call(["ping", "-c1", ipAddress], stdout=open('/dev/null', 'w'), stderr=subprocess.STDOUT)
+
+def scanNetwork(network):
+	subprocess.call(["nmap", network])
 
 ###############################################################################
 #                                                                             #
@@ -108,6 +122,14 @@ class PingTask(Task):
 	def run(self):
 		self.status = ping(self.ipAddress)
 
+class ScanTask(Task):
+
+	def __init__(self, ipAddress):
+		Task.__init__(self, ipAddress, "Scan")
+
+	def run(self):
+		scanNetwork(self.ipAddress)
+
 class HttpTask(Task):
 
 	def __init__(self, ipAddress):
@@ -132,10 +154,10 @@ class HttpTask(Task):
 ###############################################################################
 
 def usage():
-	print("Usage: netinfo.py { show | version | test | usage }")
+	print("Usage: netinfo.py { show | version | test | usage | scan}")
 
 def version():
-	print("Version: 0.6 (2010-10-19)")
+	print("Version: 0.7 (2010-10-20)")
 	print("Author:  Daniel Kaefer")
 	print("Website: http://github.com/daniel-git/netinfo")
 
@@ -148,6 +170,11 @@ def show():
 
 	for dns in getDNSs():
 		print "DNS:    \t %s" % dns
+
+def scan():
+	for network in getLocalNetworks():
+		ScanTask(network)
+
 
 def test():
 	tasks = []
@@ -191,6 +218,8 @@ elif "version" == sys.argv[1]:
 	version()
 elif "test" == sys.argv[1]:
 	test()
+elif "scan" == sys.argv[1]:
+	scan()
 else:
 	usage()
 	exit(1)
