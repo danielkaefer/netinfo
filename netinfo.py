@@ -28,7 +28,7 @@ import urllib2
 
 ###############################################################################
 #                                                                             #
-#                              Some System Calls                              #
+#                             Some System Wrapper                             #
 #                                (Only Linux)                                 #
 #                                                                             #
 ###############################################################################
@@ -79,6 +79,14 @@ def ping(ipAddress):
 
 def scanNetwork(network):
 	subprocess.call(["nmap", network])
+
+def checkScanTool():
+	try:
+		subprocess.call(["nmap", "-v"], stdout=open('/dev/null', 'w'), stderr=subprocess.STDOUT)
+		return True
+	except OSError:
+		return False
+
 
 ###############################################################################
 #                                                                             #
@@ -172,6 +180,9 @@ def show():
 		print "DNS:    \t %s" % dns
 
 def scan():
+	if(not checkScanTool()):
+		print "nmap is not found"
+		exit(1)
 	for network in getLocalNetworks():
 		ScanTask(network)
 
