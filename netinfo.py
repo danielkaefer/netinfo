@@ -162,7 +162,7 @@ class HttpTask(Task):
 ###############################################################################
 
 def usage():
-	print("Usage: netinfo.py { show | version | test | usage | scan}")
+	print("Usage: netinfo.py { show | version | test | usage | scan }")
 
 def version():
 	print("Version: 0.7 (2010-10-20)")
