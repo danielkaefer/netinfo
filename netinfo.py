@@ -2,7 +2,7 @@
 
 ###############################################################################
 #                                                                             #
-#  Copyright (C) 2008-2010  Daniel Kaefer                                     #
+#  Copyright (C) 2008-2011  Daniel Kaefer                                     #
 #                                                                             #
 #  This program is free software: you can redistribute it and/or modify       #
 #  it under the terms of the GNU General Public License as published by       #
@@ -87,6 +87,24 @@ def checkScanTool():
 	except OSError:
 		return False
 
+def isRoot():
+	return os.getuid() == 0;
+
+def checkLink(device):
+	try:
+		p = subprocess.Popen(["mii-tool"], stdout=subprocess.PIPE, stderr=open('/dev/null', 'w'))
+		p.wait()
+		output = p.communicate()[0]
+		return output
+	except OSError:
+		return None
+
+def checkLinkTool():
+	try:
+		subprocess.call(["mii-tool", "-v"], stdout=open('/dev/null', 'w'), stderr=subprocess.STDOUT)
+		return True
+	except OSError:
+		return False
 
 ###############################################################################
 #                                                                             #
@@ -124,6 +142,30 @@ class Task(threading.Thread):
 		else:
 			result += "[ \033[1;31m down \033[0m ]"
 		return result
+
+class LinkTask(Task):
+
+	def __init__(self):
+		Task.__init__(self, None, "Link")
+		self.output = None
+
+	def run(self):
+		if (isRoot() and checkLinkTool()):
+			self.output = checkLink("f")
+
+	def __str__(self):
+		self.join()
+		for line in self.output.splitlines():
+			result = line.split(":")[0]
+			result += " ("
+			result += line.split(":")[1].split(",")[0].strip()
+			result += "):"
+			result = result.ljust(68)
+			if(line.endswith("link ok")):
+				result += "[ \033[1;322m  up  \033[0m ]"
+			else:
+				result += "[ \033[1;31m down \033[0m ]"
+			return result
 
 class PingTask(Task):
 
@@ -165,7 +207,7 @@ def usage():
 	print("Usage: netinfo.py { show | version | test | usage | scan }")
 
 def version():
-	print("Version: 0.7 (2010-10-20)")
+	print("Version: 0.8 (2011-01-04)")
 	print("Author:  Daniel Kaefer")
 	print("Website: http://github.com/daniel-git/netinfo")
 
@@ -189,6 +231,7 @@ def scan():
 
 def test():
 	tasks = []
+	tasks.append(LinkTask())
 	for localIP in getLocalIPs():
 		tasks.append(PingTask(localIP, "LocalIP"))
 
