@@ -150,11 +150,11 @@ class LinkTask(Task):
 		self.output = None
 
 	def run(self):
-		if (isRoot() and checkLinkTool()):
-			self.output = checkLink("f")
+		self.output = checkLink("f")
 
 	def __str__(self):
 		self.join()
+
 		for line in self.output.splitlines():
 			result = line.split(":")[0]
 			result += " ("
@@ -178,6 +178,7 @@ class ScanTask(Task):
 		Task.__init__(self, ipAddress, "Scan")
 
 	def run(self):
+		print "Network %s" % self.ipAddress
 		scanNetwork(self.ipAddress)
 
 class HttpTask(Task):
@@ -231,7 +232,9 @@ def scan():
 
 def test():
 	tasks = []
-	tasks.append(LinkTask())
+	if (isRoot() and checkLinkTool()):
+		tasks.append(LinkTask())
+
 	for localIP in getLocalIPs():
 		tasks.append(PingTask(localIP, "LocalIP"))
 
