@@ -106,6 +106,12 @@ def checkLinkTool():
 	except OSError:
 		return False
 
+def getCols():
+	shell = "tput cols"
+	p = subprocess.Popen([shell], shell=True, stdout=subprocess.PIPE, close_fds=True)
+	p.wait()
+	return int(p.stdout.read())
+
 ###############################################################################
 #                                                                             #
 #                               Signal Handler                                #
@@ -136,7 +142,7 @@ class Task(threading.Thread):
 	def __str__(self):
 		self.join()
 		result = self.name + " (" + self.ipAddress + "):"
-		result = result.ljust(68)
+		result = result.ljust(getCols() - 12)
 		if 0 == self.status:
 			result += "[ \033[1;322m  up  \033[0m ]"
 		else:
