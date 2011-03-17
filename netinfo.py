@@ -166,7 +166,7 @@ class LinkTask(Task):
 			result += " ("
 			result += line.split(":")[1].split(",")[0].strip()
 			result += "):"
-			result = result.ljust(68)
+			result = result.ljust(getCols() - 12)
 			if(line.endswith("link ok")):
 				result += "[ \033[1;322m  up  \033[0m ]"
 			else:
@@ -214,7 +214,7 @@ def usage():
 	print("Usage: netinfo.py { show | version | test | usage | scan }")
 
 def version():
-	print("Version: 0.8 (2011-01-04)")
+	print("Version: 0.9 (2011-03-17)")
 	print("Author:  Daniel Kaefer")
 	print("Website: http://github.com/daniel-git/netinfo")
 
